@@ -374,6 +374,87 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
   transform:rotate(6deg);transform-origin:left center;z-index:4}
 .prboardwrap{padding:0 var(--pad)}
 
+
+/* ---------- CUT: checklist + calendar ---------- */
+#s-cut{justify-content:flex-start}
+.cuthead{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--hair);margin:4px 0 0}
+.cuthead>div{padding:11px 6px;text-align:center;border-right:1px solid var(--hair)}
+.cuthead>div:last-child{border-right:0}
+.cuthead b{display:block;font-family:var(--disp);font-size:25px;line-height:1;letter-spacing:-.03em;filter:url(#rough2)}
+.cuthead span{font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.5}
+.cuthead i{font-style:normal;font-size:11px;opacity:.6}
+.cutbar{position:relative;height:12px;border:1px solid var(--ink);margin:10px 0 4px;filter:url(#rough2)}
+.cutbar i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);width:0;display:block}
+.cutbar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--red);text-decoration:none}
+.cutbarlbl{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+.daycard{border:1px solid var(--ink);padding:14px;margin-top:18px;filter:url(#rough3)}
+.daycard .dch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.daycard .dch b{font-family:var(--disp);font-size:21px;letter-spacing:-.02em;text-transform:lowercase;font-weight:400}
+.daycard .dch s{text-decoration:none;font-family:var(--hand);font-size:15px;opacity:.6}
+.numrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}
+.numcell label{display:block;font-size:8px;letter-spacing:.24em;text-transform:uppercase;opacity:.45;margin-bottom:5px}
+.numcell input{width:100%;background:rgba(255,255,255,.5);border:1px solid var(--hair);padding:11px 10px;
+  font-size:17px;font-family:var(--mono);border-radius:0;appearance:none;text-align:center}
+.numcell input:focus{outline:none;border-color:var(--ink)}
+.numcell .tgt{font-size:9px;opacity:.45;text-align:center;margin-top:4px;letter-spacing:.08em}
+.numcell .tgt.ok{color:var(--red);opacity:1}
+
+.cklist{list-style:none;margin:12px 0 0;padding:0}
+.ckitem{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-top:1px solid var(--hair2);cursor:pointer}
+.ckitem:first-child{border-top:0}
+.ckbox{flex:0 0 18px;width:18px;height:18px;border:1px solid var(--ink);position:relative;margin-top:1px;filter:url(#rough2)}
+.ckbox:after{content:'';position:absolute;left:4px;top:7px;width:8px;height:4px;border-left:2px solid var(--paper);
+  border-bottom:2px solid var(--paper);transform:rotate(-45deg) scale(0);transition:transform .18s cubic-bezier(.4,1.6,.6,1)}
+.ckitem.on .ckbox{background:var(--ink)}
+.ckitem.on .ckbox:after{transform:rotate(-45deg) scale(1)}
+.ckitem .ct{flex:1;min-width:0}
+.ckitem .ct b{display:block;font-weight:400;font-size:12.5px;text-transform:lowercase}
+.ckitem .ct s{text-decoration:none;display:block;font-family:var(--hand);font-size:14px;opacity:.55;line-height:1.25;margin-top:1px}
+.ckitem.on .ct b{opacity:.55}
+.ckcount{flex:0 0 auto;font-family:var(--disp);font-size:15px;letter-spacing:-.02em;opacity:.45;padding-top:1px}
+.ckitem.on .ckcount{opacity:1}
+
+/* calendar */
+.calwrap{margin-top:20px}
+.calmonth{margin-bottom:16px}
+.calmonth h4{font-size:9px;letter-spacing:.3em;text-transform:uppercase;opacity:.55;margin:0 0 7px;font-weight:400}
+.caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.caldow span{text-align:center;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.35}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.calday{position:relative;aspect-ratio:1;border:1px solid var(--hair2);display:flex;align-items:center;
+  justify-content:center;font-size:10px;cursor:default;opacity:.3}
+.calday.inrange{opacity:1;border-color:var(--hair);cursor:pointer}
+.calday.hit{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.calday.hit:after{content:'';position:absolute;left:50%;top:50%;width:9px;height:5px;
+  border-left:2px solid var(--paper);border-bottom:2px solid var(--paper);
+  transform:translate(-50%,-70%) rotate(-45deg)}
+.calday.hit span{opacity:0}
+.calday.part{box-shadow:inset 0 -5px 0 rgba(8,8,8,.26)}
+.calday.miss{color:inherit;opacity:.45}
+.calday.miss:before{content:'';position:absolute;left:50%;top:50%;width:11px;height:1px;background:currentColor;
+  opacity:.5;transform:translate(-50%,-50%) rotate(-22deg)}
+.calday.today{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.callegend{display:flex;gap:14px;flex-wrap:wrap;font-size:8px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin-top:2px}
+.callegend i{display:inline-block;width:9px;height:9px;border:1px solid var(--ink);margin-right:5px;vertical-align:-1px}
+.callegend i.f{background:var(--ink)}
+.callegend i.p{box-shadow:inset 0 -3px 0 rgba(8,8,8,.3)}
+
+/* weight */
+.wchart{width:100%;height:190px;display:block;margin-top:6px}
+.wkeys{display:flex;gap:16px;font-size:8px;letter-spacing:.16em;text-transform:uppercase;opacity:.55;margin-top:4px}
+.wkeys b{font-weight:400}
+.wkeys u{display:inline-block;width:16px;height:0;border-top:2px solid var(--ink);vertical-align:3px;margin-right:5px;text-decoration:none}
+.wkeys u.dash{border-top-style:dashed}
+.wkeys u.act{border-top-color:var(--red)}
+.weighrow{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:end;margin-top:12px}
+.flagline{font-family:var(--hand);font-size:16px;margin-top:10px;padding-left:11px;border-left:2px solid var(--red);line-height:1.3}
+
+/* rules */
+.rulelist{list-style:none;margin:10px 0 0;padding:0}
+.rulelist li{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--hair2);font-family:var(--hand);font-size:16px;line-height:1.3}
+.rulelist li em{font-style:normal;font-family:var(--mono);font-size:9px;letter-spacing:.18em;opacity:.4;flex:0 0 16px;padding-top:3px}
+
 /* ---------- SICKNESS ---------- */
 .sick{border-top:1px solid var(--hair2);padding:14px 0}
 .sick:last-of-type{border-bottom:1px solid var(--hair2)}
@@ -443,8 +524,8 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 #dock .seg{display:flex;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);
   filter:url(#rough2)}
 #dock button{flex:1;min-width:0;background:none;border:0;border-right:1px solid var(--ink);
-  color:var(--ink);opacity:.4;font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;
-  text-transform:uppercase;cursor:pointer;padding:10px 1px;white-space:nowrap;
+  color:var(--ink);opacity:.4;font-family:var(--mono);font-size:7px;letter-spacing:.04em;
+  text-transform:uppercase;cursor:pointer;padding:10px 0;white-space:nowrap;
   transition:opacity .25s,background .25s,color .25s}
 #dock button:last-child{border-right:0}
 #dock button.on{background:var(--ink);color:var(--paper);opacity:1}
@@ -540,9 +621,65 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
     </div>
   </section>
 
-  <!-- 01 PHYSIQUE -->
+
+  <!-- 01 CUT -->
+  <section class="scene" id="s-cut">
+    <div class="smark"><span>01 / the cut</span><span id="cutMark">to dec 20</span></div>
+    <p class="eyebrow rv">165.7 &rarr; 150</p>
+    <h2 class="smear rv" id="hCut"><span class="t">the cut</span></h2>
+
+    <div class="cuthead rv" id="cutHead"></div>
+    <div class="rv">
+      <div class="cutbar" id="cutBar"><i></i><u></u></div>
+      <div class="cutbarlbl"><span id="cutFrom">165.7</span><span id="cutGoal">150.0</span></div>
+    </div>
+
+    <div class="daycard rv" id="dayCard">
+      <div class="dch"><b id="dayCardDate">today</b><s id="dayCardState">not logged</s></div>
+      <div class="numrow">
+        <div class="numcell"><label>calories</label><input id="cKcal" type="number" inputmode="numeric" placeholder="1800"><div class="tgt" id="cKcalT">target 1,800 &plusmn;100</div></div>
+        <div class="numcell"><label>steps</label><input id="cSteps" type="number" inputmode="numeric" placeholder="10000"><div class="tgt" id="cStepsT">target 10,000</div></div>
+      </div>
+      <ul class="cklist" id="ckList"></ul>
+    </div>
+
+    <div class="cuthead rv" id="cutStreak" style="margin-top:16px"></div>
+
+    <p class="eyebrow rv" style="margin-top:26px">the grid</p>
+    <div class="calwrap rv" id="calWrap"></div>
+    <div class="callegend rv">
+      <span><i class="f"></i>hit</span><span><i class="p"></i>partial</span>
+      <span><i></i>open</span><span><i style="border-color:var(--red)"></i>today</span>
+    </div>
+
+    <p class="eyebrow rv" style="margin-top:28px">the scale &mdash; mondays only</p>
+    <canvas class="wchart rv" id="wChart"></canvas>
+    <div class="wkeys rv">
+      <span><u class="act"></u><b>actual</b></span>
+      <span><u></u><b>safe</b></span>
+      <span><u class="dash"></u><b>fast</b></span>
+    </div>
+    <div class="weighrow rv">
+      <div class="numcell"><label>monday weigh-in (lb)</label><input id="wIn" type="number" inputmode="decimal" step="0.1" placeholder="165.7"></div>
+      <button class="btn sm" id="wSave" style="width:auto;padding:12px 18px">log</button>
+    </div>
+    <p class="flagline rv" id="wFlag" style="display:none"></p>
+
+    <p class="eyebrow rv" style="margin-top:28px">this week &mdash; resets monday</p>
+    <ul class="cklist rv" id="wkList"></ul>
+
+    <p class="eyebrow rv" style="margin-top:28px">the rules</p>
+    <ul class="rulelist rv">
+      <li><em>01</em>one bad day doesn&rsquo;t matter. get back to the plan at the next meal, not next monday.</li>
+      <li><em>02</em>don&rsquo;t train or chase steps with a fever, chills, or lightheadedness. the deficit can wait.</li>
+      <li><em>03</em>if the weekly average stalls 2&ndash;3 weeks, drop calories by 100&ndash;150. not more.</li>
+      <li><em>04</em>judge it on weekly weights. daily numbers are water, not fat.</li>
+    </ul>
+  </section>
+
+  <!-- 02 PHYSIQUE -->
   <section class="scene bleed" id="s-body">
-    <div class="smark"><span>01 / physique</span><span id="figMark">anterior</span></div>
+    <div class="smark"><span>02 / physique</span><span id="figMark">anterior</span></div>
     <div style="padding:0 var(--pad)">
       <p class="eyebrow rv">the subject</p>
       <h2 class="smear rv" id="hBody"><span class="t">physique</span></h2>
@@ -564,7 +701,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
   <!-- 02 SPLIT -->
   <section class="scene" id="s-split">
-    <div class="smark"><span>02 / the week</span><span>7 days</span></div>
+    <div class="smark"><span>03 / the week</span><span>7 days</span></div>
     <p class="eyebrow rv">rotation</p>
     <h2 class="smear rv" id="hSplit"><span class="t">the split</span></h2>
     <p class="hand rv" id="dayFocus" style="margin:8px 0 12px">legs / posterior chain</p>
@@ -625,7 +762,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
   <!-- 04 PROTOCOL -->
   <section class="scene" id="s-proto">
-    <div class="smark"><span>04 / protocol</span><span>the other 22 hours</span></div>
+    <div class="smark"><span>05 / protocol</span><span>the other 22 hours</span></div>
     <blockquote class="bigquote small quotebreak rv">
       <p>“purpose is better<br>than object.”</p>
       <cite>Jim Rohn</cite>
@@ -643,7 +780,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
   <!-- 05 SICK -->
   <section class="scene" id="s-sick">
-    <div class="smark"><span>05 / sickness</span><span>treat by symptom</span></div>
+    <div class="smark"><span>06 / sickness</span><span>treat by symptom</span></div>
     <p class="eyebrow rv">when it hits</p>
     <h2 class="smear rv" id="hSick"><span class="t">sick days</span></h2>
     <p class="hand rv" style="margin:10px 0 2px;opacity:.75">don't guess. match the pill to the symptom.</p>
@@ -654,7 +791,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
   <!-- 06 BIO -->
   <section class="scene" id="s-bio">
-    <div class="smark"><span>06 / origin</span><span>shot 03</span></div>
+    <div class="smark"><span>07 / origin</span><span>shot 03</span></div>
     <div style="padding:0 var(--pad)">
       <p class="eyebrow rv">before all this</p>
       <h2 class="smear rv" id="hBio"><span class="t">jaymes</span></h2>
@@ -837,6 +974,7 @@ const KEY='wrk0ut.v1';
 const DEFAULTS={
   prs:{squat:315,bench:225,deadlift:405},
   prDate:'2026-08-16',
+  cut:{days:{},weeks:{},weigh:{}},
   logs:[
     {id:'iyqfre2',exercise:'bench press (barbell)',weight:60,reps:10,sets:3,date:'2026-08-06'},
     {id:'0nghwe3',exercise:'bench press (barbell)',weight:65,reps:8,sets:3,date:'2026-08-06'},
@@ -1239,14 +1377,290 @@ function closeSheet(){
   gsap.to(sh.querySelector('.scrim'),{opacity:0,duration:.32,onComplete:()=>{sh.classList.remove('on');sheetOpen=false;}});
 }
 
+
+/* ============================================================
+   THE CUT — oct 5 to dec 20, 2026
+   ============================================================ */
+const CUT={start:'2026-10-05',end:'2026-12-20',backup:'2026-12-31',from:165.7,goal:150};
+const KCAL=1800, KCAL_SLOP=100;
+/* 8k on gym days (mon/wed/thu), 10k otherwise */
+const CUT_STEP=[10000,8000,10000,8000,8000,10000,10000];
+const CUT_DAILY=[
+  {id:'cal', t:'calories',            d:'1,800 — within 100 either way'},
+  {id:'pro', t:'protein',             d:'120 g minimum'},
+  {id:'fat', t:'fat',                 d:'50–70 g'},
+  {id:'carb',t:'carbs',               d:'the rest — roughly 170–220 g'},
+  {id:'step',t:'steps',               d:'8k on gym days, 10k on rest'},
+  {id:'walk',t:'morning walk',        d:'30 minutes'},
+  {id:'h2o', t:'water + electrolytes',d:'plenty, with salts'},
+  {id:'sup', t:'supplements',         d:'creatine 5g · vit d + fish oil with food · magnesium 30–60 min before bed'},
+  {id:'slp', t:'sleep',               d:'8 hours — asleep 9:30–10:30'},
+  {id:'wake',t:'wake-up',             d:'5:30 target, 6:30 limit'},
+  {id:'wind',t:'wind-down',           d:'1 hr before bed · dim · no bright screens · atomic habits'},
+  {id:'skin',t:'skincare',            d:'done'},
+  {id:'caf', t:'caffeine cutoff',     d:'early afternoon'},
+];
+const CUT_WEEKLY=[
+  {id:'gym', t:'gym sessions',        d:'back · chest · legs · biceps', n:3},
+  {id:'rope',t:'jump rope',           d:'two sessions',                 n:2},
+  {id:'run', t:'run',                 d:'one',                          n:1},
+  {id:'out', t:'surf, hike or mtb',   d:'bonus — not required',         n:1},
+  {id:'meal',t:'flexible meal',       d:'planned, not a cheat day',     n:1},
+  {id:'wgh', t:'monday weigh-in',     d:'after the bathroom, before food or water', n:1},
+  {id:'pho', t:'progress photo',      d:'same light, angle, time',      n:1},
+  {id:'sets',t:'log top sets',        d:'squat · bench · deadlift',     n:1},
+];
+/* monday checkpoints — [date, fast, safe] */
+const CUT_MARKS=[
+  ['2026-10-12',164.3,164.4],['2026-10-19',162.8,163.2],['2026-10-26',161.4,161.9],
+  ['2026-11-02',159.9,160.7],['2026-11-09',158.5,159.4],['2026-11-16',157.0,158.1],
+  ['2026-11-23',155.6,156.9],['2026-11-30',154.1,155.6],['2026-12-07',152.7,154.4],
+  ['2026-12-14',151.2,153.1],['2026-12-21',150.0,151.8],
+];
+
+const dOf=s=>new Date(s+'T12:00:00');
+const sOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const daysBetween=(a,b)=>Math.round((dOf(b)-dOf(a))/86400000);
+function mondayOf(str){const d=dOf(str);const w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return sOf(d);}
+function cutStore(){
+  if(!DB.cut)DB.cut={days:{},weeks:{},weigh:{}};
+  DB.cut.days=DB.cut.days||{};DB.cut.weeks=DB.cut.weeks||{};DB.cut.weigh=DB.cut.weigh||{};
+  return DB.cut;
+}
+const stepTargetFor=str=>CUT_STEP[dOf(str).getDay()];
+function dayRec(str){const c=cutStore();return c.days[str]||(c.days[str]={k:null,s:null,d:[]});}
+function dayHit(r,str){
+  if(!r)return false;
+  const kOk=r.k!=null&&Math.abs(r.k-KCAL)<=KCAL_SLOP;
+  const sOk=r.s!=null&&r.s>=stepTargetFor(str);
+  return kOk&&sOk;
+}
+const dayTouched=r=>!!r&&(r.k!=null||r.s!=null||(r.d&&r.d.length>0));
+
+/* ---- header ---- */
+function renderCutHead(){
+  const today=todayStr();
+  const left=Math.max(0,daysBetween(today,CUT.end));
+  const w=latestWeight();
+  const togo=Math.max(0,+(w-CUT.goal).toFixed(1));
+  const h=$('#cutHead');if(!h)return;
+  h.innerHTML='<div><b>'+left+'</b><span>days to dec 20</span></div>'+
+    '<div><b>'+w.toFixed(1)+'</b><span>current lb</span></div>'+
+    '<div><b>'+togo.toFixed(1)+'</b><span>lb to go</span></div>';
+  const span=CUT.from-CUT.goal;
+  const pct=Math.max(0,Math.min(100,((CUT.from-w)/span)*100));
+  const bar=$('#cutBar');
+  if(bar){bar.querySelector('i').style.width=pct.toFixed(1)+'%';
+    const pace=paceTarget(today);
+    bar.querySelector('u').style.left=(pace==null?pct:Math.max(0,Math.min(100,((CUT.from-pace)/span)*100))).toFixed(1)+'%';}
+  const mk=$('#cutMark');if(mk)mk.textContent=left+' days left';
+}
+function latestWeight(){
+  const c=cutStore();const ks=Object.keys(c.weigh).sort();
+  return ks.length?c.weigh[ks[ks.length-1]]:CUT.from;
+}
+/* where the safe line says he should be today */
+function paceTarget(str){
+  let prev=[CUT.start,CUT.from,CUT.from];
+  for(const m of CUT_MARKS){
+    if(str<=m[0]){
+      const span=daysBetween(prev[0],m[0])||1, got=daysBetween(prev[0],str);
+      return prev[2]+(m[2]-prev[2])*(got/span);
+    }
+    prev=m;
+  }
+  return CUT_MARKS[CUT_MARKS.length-1][2];
+}
+
+/* ---- today's card ---- */
+let cutDay=null;
+function renderDayCard(){
+  const str=cutDay||todayStr();
+  cutDay=str;
+  const r=dayRec(str), st=stepTargetFor(str);
+  const isToday=str===todayStr();
+  $('#dayCardDate').textContent=isToday?'today':dOf(str).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}).toLowerCase();
+  $('#dayCardState').textContent=dayHit(r,str)?'hit ✓':(dayTouched(r)?'in progress':'not logged');
+  $('#cKcal').value=r.k==null?'':r.k;
+  $('#cSteps').value=r.s==null?'':r.s;
+  const kt=$('#cKcalT'), stt=$('#cStepsT');
+  const kOk=r.k!=null&&Math.abs(r.k-KCAL)<=KCAL_SLOP;
+  kt.textContent=kOk?'on target':'target 1,800 ±100';
+  kt.className='tgt'+(kOk?' ok':'');
+  const sOk=r.s!=null&&r.s>=st;
+  stt.textContent=sOk?'target met':'target '+st.toLocaleString();
+  stt.className='tgt'+(sOk?' ok':'');
+  $('#ckList').innerHTML=CUT_DAILY.map(it=>
+    '<li class="ckitem'+((r.d||[]).includes(it.id)?' on':'')+'" data-ck="'+it.id+'">'+
+    '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span></li>').join('');
+  $$('#ckList .ckitem').forEach(li=>li.onclick=()=>{
+    const id=li.dataset.ck, rec=dayRec(cutDay);
+    rec.d=rec.d||[];
+    const i=rec.d.indexOf(id);
+    if(i<0){rec.d.push(id);li.classList.add('on');}else{rec.d.splice(i,1);li.classList.remove('on');}
+    save();renderCalendar();renderStreak();
+    if(navigator.vibrate)navigator.vibrate(6);
+  });
+}
+function bindCutInputs(){
+  const commit=()=>{
+    const r=dayRec(cutDay||todayStr());
+    const k=parseFloat($('#cKcal').value), s=parseFloat($('#cSteps').value);
+    r.k=isNaN(k)?null:k; r.s=isNaN(s)?null:s;
+    save();renderDayCard();renderCalendar();renderStreak();renderCutHead();
+  };
+  ['#cKcal','#cSteps'].forEach(sel=>{
+    const el=$(sel);if(!el)return;
+    el.addEventListener('change',commit);
+    el.addEventListener('blur',commit);
+  });
+  const ws=$('#wSave');
+  if(ws)ws.onclick=()=>{
+    const v=parseFloat($('#wIn').value);
+    if(isNaN(v)){toast('enter a weight');return;}
+    const c=cutStore();
+    c.weigh[mondayOf(todayStr())]=v;
+    save();$('#wIn').value='';
+    renderCutHead();drawWeight();renderWeekly();
+    toast('logged '+v.toFixed(1)+' lb');
+  };
+}
+
+/* ---- streak + weekly score ---- */
+function renderStreak(){
+  const c=cutStore();
+  let streak=0, d=todayStr();
+  if(!dayHit(c.days[d],d))d=sOf(new Date(dOf(d).getTime()-86400000));
+  while(d>=CUT.start&&dayHit(c.days[d],d)){streak++;d=sOf(new Date(dOf(d).getTime()-86400000));}
+  const mon=mondayOf(todayStr());
+  let hits=0,logged=0;
+  for(let i=0;i<7;i++){
+    const s=sOf(new Date(dOf(mon).getTime()+i*86400000));
+    if(s>todayStr())break;
+    logged++; if(dayHit(c.days[s],s))hits++;
+  }
+  const el=$('#cutStreak');
+  if(el)el.innerHTML='<div><b>'+streak+'</b><span>day streak</span></div>'+
+    '<div><b>'+hits+'/'+logged+'</b><span>this week</span></div>'+
+    '<div><b>'+Object.keys(c.days).filter(k=>dayHit(c.days[k],k)).length+'</b><span>days hit</span></div>';
+}
+
+/* ---- calendar ---- */
+const MONTHS=[[2026,9],[2026,10],[2026,11]];
+function renderCalendar(){
+  const wrap=$('#calWrap');if(!wrap)return;
+  const c=cutStore(), today=todayStr();
+  wrap.innerHTML=MONTHS.map(([y,m])=>{
+    const first=new Date(y,m,1), nd=new Date(y,m+1,0).getDate(), lead=first.getDay();
+    let cells='';
+    for(let i=0;i<lead;i++)cells+='<div class="calday"></div>';
+    for(let d=1;d<=nd;d++){
+      const str=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const inr=str>=CUT.start&&str<=CUT.end;
+      const r=c.days[str];
+      let cls='calday'+(inr?' inrange':'');
+      if(inr&&dayHit(r,str))cls+=' hit';
+      else if(inr&&dayTouched(r))cls+=' part';
+      else if(inr&&str<today)cls+=' miss';
+      if(str===today)cls+=' today';
+      cells+='<div class="'+cls+'"'+(inr?' data-d="'+str+'"':'')+'><span>'+d+'</span></div>';
+    }
+    return '<div class="calmonth"><h4>'+first.toLocaleDateString('en-US',{month:'long'})+'</h4>'+
+      '<div class="caldow"><span>s</span><span>m</span><span>t</span><span>w</span><span>t</span><span>f</span><span>s</span></div>'+
+      '<div class="calgrid">'+cells+'</div></div>';
+  }).join('');
+  $$('#calWrap .calday[data-d]').forEach(el=>el.onclick=()=>{
+    cutDay=el.dataset.d;renderDayCard();
+    const card=$('#dayCard');
+    if(card){card.scrollIntoView({behavior:'smooth',block:'center'});
+      gsap.fromTo(card,{borderColor:'#c8102e'},{borderColor:'rgba(8,8,8,.9)',duration:1.1});}
+  });
+}
+
+/* ---- weight chart ---- */
+function drawWeight(){
+  const cv=$('#wChart');if(!cv)return;
+  let ctx=null;try{ctx=cv.getContext('2d');}catch(e){}
+  if(!ctx)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const W=cv.clientWidth||340, H=190;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  const padL=30,padR=8,padT=12,padB=20;
+  const x0=dOf(CUT.start).getTime(), x1=dOf('2026-12-21').getTime();
+  const yMin=148,yMax=167;
+  const X=t=>padL+((t-x0)/(x1-x0))*(W-padL-padR);
+  const Y=v=>padT+((yMax-v)/(yMax-yMin))*(H-padT-padB);
+  const ink=getComputedStyle(document.body).getPropertyValue('--ink').trim()||'#080808';
+  ctx.font='8px ui-monospace,monospace';ctx.fillStyle=ink;ctx.globalAlpha=.45;
+  [150,155,160,165].forEach(v=>{
+    ctx.globalAlpha=.13;ctx.beginPath();ctx.moveTo(padL,Y(v));ctx.lineTo(W-padR,Y(v));ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+    ctx.globalAlpha=.45;ctx.fillText(String(v),2,Y(v)+3);
+  });
+  ctx.globalAlpha=1;
+  const line=(pts,dash,alpha,col)=>{
+    if(pts.length<2)return;
+    ctx.save();ctx.setLineDash(dash);ctx.globalAlpha=alpha;ctx.strokeStyle=col||ink;ctx.lineWidth=1.6;
+    ctx.beginPath();pts.forEach((p,i)=>{const fx=X(dOf(p[0]).getTime()),fy=Y(p[1]);i?ctx.lineTo(fx,fy):ctx.moveTo(fx,fy);});
+    ctx.stroke();ctx.restore();
+  };
+  line([[CUT.start,CUT.from]].concat(CUT_MARKS.map(m=>[m[0],m[1]])),[4,3],.42);
+  line([[CUT.start,CUT.from]].concat(CUT_MARKS.map(m=>[m[0],m[2]])),[],.60);
+  const c=cutStore();
+  const act=Object.keys(c.weigh).sort().map(k=>[k,c.weigh[k]]);
+  const all=[[CUT.start,CUT.from]].concat(act.filter(p=>p[0]>CUT.start));
+  line(all,[],1,'#c8102e');
+  ctx.fillStyle='#c8102e';
+  all.forEach(p=>{ctx.beginPath();ctx.arc(X(dOf(p[0]).getTime()),Y(p[1]),3,0,7);ctx.fill();});
+  ctx.globalAlpha=.45;ctx.fillStyle=ink;
+  ctx.fillText('oct',X(dOf('2026-10-05').getTime()),H-6);
+  ctx.fillText('nov',X(dOf('2026-11-02').getTime()),H-6);
+  ctx.fillText('dec 20',X(dOf('2026-12-14').getTime()),H-6);
+  ctx.globalAlpha=1;
+  /* two weeks above the safe line -> flag */
+  const f=$('#wFlag');if(!f)return;
+  const over=CUT_MARKS.filter(m=>c.weigh[m[0]]!=null&&c.weigh[m[0]]>m[2]).map(m=>m[0]);
+  let run=0;
+  for(let i=0;i<CUT_MARKS.length;i++){
+    const k=CUT_MARKS[i][0];
+    if(c.weigh[k]==null)continue;
+    run=over.includes(k)?run+1:0;
+  }
+  if(run>=2){f.style.display='block';
+    f.textContent='two weigh-ins above the safe line. drop calories by 100–150 — not more — and give it another two weeks.';}
+  else f.style.display='none';
+}
+
+/* ---- weekly checklist ---- */
+function renderWeekly(){
+  const host=$('#wkList');if(!host)return;
+  const c=cutStore(), mon=mondayOf(todayStr());
+  const wk=c.weeks[mon]||(c.weeks[mon]={});
+  host.innerHTML=CUT_WEEKLY.map(it=>{
+    const got=wk[it.id]||0, done=got>=it.n;
+    return '<li class="ckitem'+(done?' on':'')+'" data-wk="'+it.id+'" data-n="'+it.n+'">'+
+      '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span>'+
+      (it.n>1?'<span class="ckcount">'+got+'/'+it.n+'</span>':'')+'</li>';
+  }).join('');
+  $$('#wkList .ckitem').forEach(li=>li.onclick=()=>{
+    const id=li.dataset.wk, n=+li.dataset.n;
+    const w=c.weeks[mondayOf(todayStr())];
+    w[id]=((w[id]||0)+1)%(n+1);
+    save();renderWeekly();
+    if(navigator.vibrate)navigator.vibrate(6);
+  });
+}
+function renderCut(){renderCutHead();renderDayCard();renderCalendar();renderStreak();renderWeekly();}
+
 /* ============================================================
    SCROLL STORY
    ============================================================ */
-const SECTIONS=['s-intro','s-body','s-split','s-prs','s-proto','s-sick','s-bio'];
-const DOCKNAMES=['intro','body','split','prs','fuel','sick','bio'];
-const HEADS=[null,'#hBody','#hSplit',null,'#hProto','#hSick','#hBio'];
+const SECTIONS=['s-intro','s-cut','s-body','s-split','s-prs','s-proto','s-sick','s-bio'];
+const DOCKNAMES=['intro','cut','body','split','prs','fuel','sick','bio'];
+const HEADS=[null,'#hCut','#hBody','#hSplit',null,'#hProto','#hSick','#hBio'];
 /* which plate sits behind which scene */
-const PLATE=['half','half','ink','grain','green','smoke','ocean'];
+const PLATE=['half','half','half','ink','grain','green','smoke','ocean'];
 const PLATE_OPACITY={half:.17,ink:.30,smoke:.55,grain:.45,green:.62,ocean:.65};
 const PLATE_EL={half:'bgHalf',ink:'bgInk',smoke:'bgSmoke',grain:'bgGrain',green:'bgGreen',ocean:'bgOcean'};
 let plateNow='';
@@ -1260,8 +1674,8 @@ function setPlate(kind){
   });
 }
 /* pages that render inverted */
-const THEME=['','','','','green','dark','ocean'];
-const THEME_COLOR=['#f4f2ee','#f4f2ee','#f4f2ee','#f4f2ee','#0d1410','#080808','#0a1220'];
+const THEME=['','','','','','green','dark','ocean'];
+const THEME_COLOR=['#f4f2ee','#f4f2ee','#f4f2ee','#f4f2ee','#f4f2ee','#0d1410','#080808','#0a1220'];
 
 function buildDock(){
   const seg=$('#dock .seg')||$('#dock');
@@ -1324,6 +1738,7 @@ function enterPage(i){
   if(id==='s-intro')playSelTitle();
   if(id==='s-prs')playBand();
   if(id==='s-bio')playTraits();
+  if(id==='s-cut'){cutDay=todayStr();renderCut();drawWeight();}
   if(id==='s-prs')setTimeout(()=>{$$('#prBoard canvas').forEach((c,k)=>
     sparkline(c,['squat','bench press (barbell)','deadlift'][k]));},260);
 }
@@ -1413,6 +1828,7 @@ function updateHint(){
 window.addEventListener('load',()=>{
   bindImages();initSmear();
   buildDock();renderRail();renderProto();renderSick();renderTraits();renderTravel();renderBioAge();renderAll();initForms();
+  renderCut();bindCutInputs();
   layoutFigure();buildAnno();
   setPlate(PLATE[0]);
   bootSequence();

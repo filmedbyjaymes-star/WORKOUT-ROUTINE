@@ -425,20 +425,24 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .calday{position:relative;aspect-ratio:1;border:1px solid var(--hair2);display:flex;align-items:center;
   justify-content:center;font-size:10px;cursor:default;opacity:.3}
 .calday.inrange{opacity:1;border-color:var(--hair);cursor:pointer}
-.calday.hit{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.calday.hit:after{content:'';position:absolute;left:50%;top:50%;width:9px;height:5px;
-  border-left:2px solid var(--paper);border-bottom:2px solid var(--paper);
-  transform:translate(-50%,-70%) rotate(-45deg)}
-.calday.hit span{opacity:0}
-.calday.part{box-shadow:inset 0 -5px 0 rgba(8,8,8,.26)}
-.calday.miss{color:inherit;opacity:.45}
+.calday.lgreen{background:#a8cf9f;border-color:#8dbb84;color:#09220d}
+.calday.dgreen{background:#2f6b42;border-color:#2f6b42;color:#f2f6f2}
+.calday.blue{background:#8bbbdd;border-color:#6ea4c9;color:#08202e}
+.calday.red{background:#c8102e;border-color:#c8102e;color:#fdf0f2}
+.calday.part{box-shadow:inset 0 -5px 0 rgba(8,8,8,.22)}
+.calday.miss{opacity:.45}
 .calday.miss:before{content:'';position:absolute;left:50%;top:50%;width:11px;height:1px;background:currentColor;
   opacity:.5;transform:translate(-50%,-50%) rotate(-22deg)}
 .calday.today{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
-.callegend{display:flex;gap:14px;flex-wrap:wrap;font-size:8px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin-top:2px}
-.callegend i{display:inline-block;width:9px;height:9px;border:1px solid var(--ink);margin-right:5px;vertical-align:-1px}
-.callegend i.f{background:var(--ink)}
-.callegend i.p{box-shadow:inset 0 -3px 0 rgba(8,8,8,.3)}
+.callegend{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;font-size:8px;letter-spacing:.12em;
+  text-transform:uppercase;opacity:.65;margin-top:6px}
+.callegend span{display:flex;align-items:center;gap:6px}
+.callegend i{display:inline-block;width:11px;height:11px;border:1px solid var(--hair);flex:0 0 11px}
+.callegend i.lg{background:#a8cf9f;border-color:#8dbb84}
+.callegend i.dg{background:#2f6b42;border-color:#2f6b42}
+.callegend i.bl{background:#8bbbdd;border-color:#6ea4c9}
+.callegend i.rd{background:#c8102e;border-color:#c8102e}
+.callegend i.td{border-color:var(--red);border-width:2px}
 
 /* weight */
 .wchart{width:100%;height:190px;display:block;margin-top:6px}
@@ -636,10 +640,6 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
     <div class="daycard rv" id="dayCard">
       <div class="dch"><b id="dayCardDate">today</b><s id="dayCardState">not logged</s></div>
-      <div class="numrow">
-        <div class="numcell"><label>calories</label><input id="cKcal" type="number" inputmode="numeric" placeholder="1800"><div class="tgt" id="cKcalT">target 1,800 &plusmn;100</div></div>
-        <div class="numcell"><label>steps</label><input id="cSteps" type="number" inputmode="numeric" placeholder="10000"><div class="tgt" id="cStepsT">target 10,000</div></div>
-      </div>
       <ul class="cklist" id="ckList"></ul>
     </div>
 
@@ -648,8 +648,12 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
     <p class="eyebrow rv" style="margin-top:26px">the grid</p>
     <div class="calwrap rv" id="calWrap"></div>
     <div class="callegend rv">
-      <span><i class="f"></i>hit</span><span><i class="p"></i>partial</span>
-      <span><i></i>open</span><span><i style="border-color:var(--red)"></i>today</span>
+      <span><i class="lg"></i>calories</span>
+      <span><i class="dg"></i>calories + steps</span>
+      <span><i class="bl"></i>cals + steps + gym</span>
+      <span><i class="rd"></i>missed calories</span>
+      <span><i class="td"></i>today</span>
+      <span><i></i>open</span>
     </div>
 
     <p class="eyebrow rv" style="margin-top:28px">the scale &mdash; mondays only</p>
@@ -1382,19 +1386,16 @@ function closeSheet(){
    THE CUT — oct 5 to dec 20, 2026
    ============================================================ */
 const CUT={start:'2026-10-05',end:'2026-12-20',backup:'2026-12-31',from:165.7,goal:150};
-const KCAL=1800, KCAL_SLOP=100;
-/* 8k on gym days (mon/wed/thu), 10k otherwise */
-const CUT_STEP=[10000,8000,10000,8000,8000,10000,10000];
 const CUT_DAILY=[
-  {id:'cal', t:'calories',            d:'1,800 — within 100 either way'},
+  {id:'cal', t:'calories',            d:'hit the target for the day'},
+  {id:'miss',t:'missed calories',     d:'went over — marks the day red'},
   {id:'step',t:'steps',               d:'8k on gym days, 10k on rest'},
-  {id:'walk',t:'morning walk',        d:'30 minutes'},
-  {id:'h2o', t:'water + electrolytes',d:'plenty, with salts'},
+  {id:'gym', t:'went to the gym',     d:'trained today'},
   {id:'sup', t:'supplements',         d:'creatine 5g · vit d + fish oil with food · magnesium 30–60 min before bed'},
   {id:'stud',t:'personal study',      d:'read, learn, work on something that is yours'},
-  {id:'skin',t:'skincare',            d:'done'},
-  {id:'caf', t:'caffeine cutoff',     d:'early afternoon'},
 ];
+/* calories decides the colour before anything else */
+const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps',blue:'calories + steps + gym',red:'missed calories'};
 const CUT_WEEKLY=[
   {id:'gym', t:'gym sessions',        d:'back · chest · legs · biceps', n:3},
   {id:'rope',t:'jump rope',           d:'two sessions',                 n:2},
@@ -1422,13 +1423,21 @@ function cutStore(){
   DB.cut.days=DB.cut.days||{};DB.cut.weeks=DB.cut.weeks||{};DB.cut.weigh=DB.cut.weigh||{};
   return DB.cut;
 }
-const stepTargetFor=str=>CUT_STEP[dOf(str).getDay()];
 function dayRec(str){const c=cutStore();return c.days[str]||(c.days[str]={k:null,s:null,d:[]});}
+function dayColor(str){
+  const r=cutStore().days[str];
+  if(!r||!r.d||!r.d.length)return '';
+  const has=id=>r.d.indexOf(id)>=0;
+  if(has('miss'))return 'red';                 /* calories first, always */
+  if(!has('cal'))return 'part';                /* logged, but calories undecided */
+  if(has('step')&&has('gym'))return 'blue';
+  if(has('step'))return 'dgreen';
+  return 'lgreen';
+}
+/* "hit" = calories met. drives the streak and the weekly score. */
 function dayHit(r,str){
-  if(!r)return false;
-  const kOk=r.k!=null&&Math.abs(r.k-KCAL)<=KCAL_SLOP;
-  const sOk=r.s!=null&&r.s>=stepTargetFor(str);
-  return kOk&&sOk;
+  if(!r||!r.d)return false;
+  return r.d.indexOf('cal')>=0 && r.d.indexOf('miss')<0;
 }
 const dayTouched=r=>!!r&&(r.k!=null||r.s!=null||(r.d&&r.d.length>0));
 
@@ -1472,19 +1481,11 @@ let cutDay=null;
 function renderDayCard(){
   const str=cutDay||todayStr();
   cutDay=str;
-  const r=dayRec(str), st=stepTargetFor(str);
+  const r=dayRec(str);
   const isToday=str===todayStr();
+  const col=dayColor(str);
   $('#dayCardDate').textContent=isToday?'today':dOf(str).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}).toLowerCase();
-  $('#dayCardState').textContent=dayHit(r,str)?'hit ✓':(dayTouched(r)?'in progress':'not logged');
-  $('#cKcal').value=r.k==null?'':r.k;
-  $('#cSteps').value=r.s==null?'':r.s;
-  const kt=$('#cKcalT'), stt=$('#cStepsT');
-  const kOk=r.k!=null&&Math.abs(r.k-KCAL)<=KCAL_SLOP;
-  kt.textContent=kOk?'on target':'target 1,800 ±100';
-  kt.className='tgt'+(kOk?' ok':'');
-  const sOk=r.s!=null&&r.s>=st;
-  stt.textContent=sOk?'target met':'target '+st.toLocaleString();
-  stt.className='tgt'+(sOk?' ok':'');
+  $('#dayCardState').textContent=col?(CUT_COLORS[col]||'in progress'):'not logged';
   $('#ckList').innerHTML=CUT_DAILY.map(it=>
     '<li class="ckitem'+((r.d||[]).includes(it.id)?' on':'')+'" data-ck="'+it.id+'">'+
     '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span></li>').join('');
@@ -1492,23 +1493,17 @@ function renderDayCard(){
     const id=li.dataset.ck, rec=dayRec(cutDay);
     rec.d=rec.d||[];
     const i=rec.d.indexOf(id);
-    if(i<0){rec.d.push(id);li.classList.add('on');}else{rec.d.splice(i,1);li.classList.remove('on');}
-    save();renderCalendar();renderStreak();
+    if(i<0){
+      rec.d.push(id);
+      /* hit and missed are opposites — ticking one clears the other */
+      if(id==='cal'){const j=rec.d.indexOf('miss');if(j>=0)rec.d.splice(j,1);}
+      if(id==='miss'){const j=rec.d.indexOf('cal');if(j>=0)rec.d.splice(j,1);}
+    } else rec.d.splice(i,1);
+    save();renderDayCard();renderCalendar();renderStreak();
     if(navigator.vibrate)navigator.vibrate(6);
   });
 }
 function bindCutInputs(){
-  const commit=()=>{
-    const r=dayRec(cutDay||todayStr());
-    const k=parseFloat($('#cKcal').value), s=parseFloat($('#cSteps').value);
-    r.k=isNaN(k)?null:k; r.s=isNaN(s)?null:s;
-    save();renderDayCard();renderCalendar();renderStreak();renderCutHead();
-  };
-  ['#cKcal','#cSteps'].forEach(sel=>{
-    const el=$(sel);if(!el)return;
-    el.addEventListener('change',commit);
-    el.addEventListener('blur',commit);
-  });
   const ws=$('#wSave');
   if(ws)ws.onclick=()=>{
     const v=parseFloat($('#wIn').value);
@@ -1520,7 +1515,6 @@ function bindCutInputs(){
     toast('logged '+v.toFixed(1)+' lb');
   };
 }
-
 /* ---- streak + weekly score ---- */
 function renderStreak(){
   const c=cutStore();
@@ -1554,8 +1548,8 @@ function renderCalendar(){
       const inr=str>=CUT.start&&str<=CUT.end;
       const r=c.days[str];
       let cls='calday'+(inr?' inrange':'');
-      if(inr&&dayHit(r,str))cls+=' hit';
-      else if(inr&&dayTouched(r))cls+=' part';
+      const col=inr?dayColor(str):'';
+      if(col)cls+=' '+col;
       else if(inr&&str<today)cls+=' miss';
       if(str===today)cls+=' today';
       cells+='<div class="'+cls+'"'+(inr?' data-d="'+str+'"':'')+'><span>'+d+'</span></div>';

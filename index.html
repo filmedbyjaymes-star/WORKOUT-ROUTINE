@@ -388,7 +388,12 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .cutbar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--red);text-decoration:none}
 .cutbarlbl{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.18em;text-transform:uppercase;opacity:.5}
 
-.daycard{border:1px solid var(--ink);padding:14px;margin-top:18px;filter:url(#rough3)}
+.daycard{border:1px solid var(--ink);padding:14px;margin-top:18px;filter:url(#rough3);transition:border-color .3s}
+.daycard.past{border-style:dashed}
+.backtoday{display:none;background:none;border:0;padding:0 0 11px;margin:-4px 0 0;cursor:pointer;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);opacity:.55}
+.backtoday:active{opacity:1}
+.caltip{font-family:var(--hand);font-size:15px;opacity:.6;margin:0 0 8px}
 .daycard .dch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .daycard .dch b{font-family:var(--disp);font-size:21px;letter-spacing:-.02em;text-transform:lowercase;font-weight:400}
 .daycard .dch s{text-decoration:none;font-family:var(--hand);font-size:15px;opacity:.6}
@@ -430,9 +435,14 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .calday.blue{background:#8bbbdd;border-color:#6ea4c9;color:#08202e}
 .calday.red{background:#c8102e;border-color:#c8102e;color:#fdf0f2}
 .calday.part{box-shadow:inset 0 -5px 0 rgba(8,8,8,.22)}
-.calday.miss{opacity:.45}
-.calday.miss:before{content:'';position:absolute;left:50%;top:50%;width:11px;height:1px;background:currentColor;
-  opacity:.5;transform:translate(-50%,-50%) rotate(-22deg)}
+.calday.miss{opacity:.62}
+.calday.miss:before{content:'';position:absolute;left:50%;top:50%;width:13px;height:1px;background:currentColor;
+  opacity:.38;transform:translate(-50%,-50%) rotate(-22deg)}
+.calday.inrange{transition:transform .12s}
+.calday.inrange:active{transform:scale(.88)}
+/* the day the card is currently showing */
+.calday.sel{box-shadow:0 0 0 2px var(--ink);z-index:2}
+.calday.today.sel{box-shadow:0 0 0 2px var(--red)}
 .calday.today{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
 .callegend{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;font-size:8px;letter-spacing:.12em;
   text-transform:uppercase;opacity:.65;margin-top:6px}
@@ -640,12 +650,14 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
     <div class="daycard rv" id="dayCard">
       <div class="dch"><b id="dayCardDate">today</b><s id="dayCardState">not logged</s></div>
+      <button class="backtoday" id="backToday">&larr; back to today</button>
       <ul class="cklist" id="ckList"></ul>
     </div>
 
     <div class="cuthead rv" id="cutStreak" style="margin-top:16px"></div>
 
     <p class="eyebrow rv" style="margin-top:26px">the grid</p>
+    <p class="caltip rv">tap any square to fill that day in &mdash; missed days stay crossed until you do.</p>
     <div class="calwrap rv" id="calWrap"></div>
     <div class="callegend rv">
       <span><i class="lg"></i>calories</span>
@@ -1423,7 +1435,7 @@ function cutStore(){
   DB.cut.days=DB.cut.days||{};DB.cut.weeks=DB.cut.weeks||{};DB.cut.weigh=DB.cut.weigh||{};
   return DB.cut;
 }
-function dayRec(str){const c=cutStore();return c.days[str]||(c.days[str]={k:null,s:null,d:[]});}
+function dayRec(str){const c=cutStore();return c.days[str]||(c.days[str]={d:[]});}
 function dayColor(str){
   const r=cutStore().days[str];
   if(!r||!r.d||!r.d.length)return '';
@@ -1486,6 +1498,9 @@ function renderDayCard(){
   const col=dayColor(str);
   $('#dayCardDate').textContent=isToday?'today':dOf(str).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}).toLowerCase();
   $('#dayCardState').textContent=col?(CUT_COLORS[col]||'in progress'):'not logged';
+  const bt=$('#backToday'), card=$('#dayCard');
+  if(bt)bt.style.display=isToday?'none':'block';
+  if(card)card.classList.toggle('past',!isToday);
   $('#ckList').innerHTML=CUT_DAILY.map(it=>
     '<li class="ckitem'+((r.d||[]).includes(it.id)?' on':'')+'" data-ck="'+it.id+'">'+
     '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span></li>').join('');
@@ -1504,6 +1519,8 @@ function renderDayCard(){
   });
 }
 function bindCutInputs(){
+  const bt=$('#backToday');
+  if(bt)bt.onclick=()=>{cutDay=todayStr();renderDayCard();renderCalendar();};
   const ws=$('#wSave');
   if(ws)ws.onclick=()=>{
     const v=parseFloat($('#wIn').value);
@@ -1552,6 +1569,7 @@ function renderCalendar(){
       if(col)cls+=' '+col;
       else if(inr&&str<today)cls+=' miss';
       if(str===today)cls+=' today';
+      if(inr&&str===cutDay)cls+=' sel';
       cells+='<div class="'+cls+'"'+(inr?' data-d="'+str+'"':'')+'><span>'+d+'</span></div>';
     }
     return '<div class="calmonth"><h4>'+first.toLocaleDateString('en-US',{month:'long'})+'</h4>'+
@@ -1559,7 +1577,7 @@ function renderCalendar(){
       '<div class="calgrid">'+cells+'</div></div>';
   }).join('');
   $$('#calWrap .calday[data-d]').forEach(el=>el.onclick=()=>{
-    cutDay=el.dataset.d;renderDayCard();
+    cutDay=el.dataset.d;renderDayCard();renderCalendar();
     const card=$('#dayCard');
     if(card){card.scrollIntoView({behavior:'smooth',block:'center'});
       gsap.fromTo(card,{borderColor:'#c8102e'},{borderColor:'rgba(8,8,8,.9)',duration:1.1});}

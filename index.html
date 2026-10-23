@@ -202,6 +202,8 @@ svg.defs{position:absolute;width:0;height:0;overflow:hidden}
 .bioline dt{font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;opacity:.45;min-width:52px}
 .scrollcue{display:flex;align-items:center;gap:10px;margin-top:20px;font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.5}
 .scrollcue i{display:block;width:32px;height:1px;background:currentColor;animation:cue 1.9s ease-in-out infinite;transform-origin:left}
+.buildstamp{font-size:7.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.34;
+  text-align:center;margin:26px 0 0;font-family:var(--mono)}
 @keyframes cue{0%,100%{transform:scaleX(.25)}50%{transform:scaleX(1)}}
 
 /* ---------- PHYSIQUE ---------- */
@@ -418,6 +420,13 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .ckitem .ct s{text-decoration:none;display:block;font-family:var(--hand);font-size:14px;opacity:.55;line-height:1.25;margin-top:1px}
 .ckitem.on .ct b{opacity:.55}
 .ckcount{flex:0 0 auto;font-family:var(--disp);font-size:15px;letter-spacing:-.02em;opacity:.45;padding-top:1px}
+/* step tiers — 6k floor, 8k normal, 10k off-days */
+.steprow{cursor:default}
+.tiers{display:flex;gap:4px;flex:0 0 auto;padding-top:1px}
+.tier{background:none;border:1px solid var(--hair);padding:6px 7px;font-family:var(--mono);font-size:9px;
+  letter-spacing:.04em;color:var(--ink);opacity:.45;cursor:pointer;filter:url(#rough2);transition:.15s}
+.tier:active{transform:scale(.9)}
+.tier.on{background:var(--ink);color:var(--paper);border-color:var(--ink);opacity:1}
 .ckitem.on .ckcount{opacity:1}
 
 /* calendar */
@@ -434,7 +443,6 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .calday.dgreen{background:#2f6b42;border-color:#2f6b42;color:#f2f6f2}
 .calday.blue{background:#8bbbdd;border-color:#6ea4c9;color:#08202e}
 .calday.red{background:#c8102e;border-color:#c8102e;color:#fdf0f2}
-.calday.cheat{background:#f4b6bd;border-color:#e58f9a;color:#3a0a10}
 .calday.part{box-shadow:inset 0 -5px 0 rgba(8,8,8,.22)}
 .calday.miss{opacity:.62}
 .calday.miss:before{content:'';position:absolute;left:50%;top:50%;width:13px;height:1px;background:currentColor;
@@ -453,7 +461,6 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .callegend i.dg{background:#2f6b42;border-color:#2f6b42}
 .callegend i.bl{background:#8bbbdd;border-color:#6ea4c9}
 .callegend i.rd{background:#c8102e;border-color:#c8102e}
-.callegend i.pk{background:#f4b6bd;border-color:#e58f9a}
 .callegend i.td{border-color:var(--red);border-width:2px}
 
 /* weight */
@@ -634,6 +641,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
       <div class="rule rv"></div>
       <p class="tiny rv" id="heroPRs" style="text-align:center">295 squat / 225 bench / 405 deadlift</p>
       <div class="scrollcue rv" style="justify-content:center"><i></i> tabs below</div>
+      <p class="buildstamp rv" id="buildStamp">build 2026.10.23 &middot; f39d</p>
     </div>
   </section>
 
@@ -666,7 +674,6 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
       <span><i class="dg"></i>calories + steps</span>
       <span><i class="bl"></i>cals + steps + gym</span>
       <span><i class="rd"></i>missed calories</span>
-      <span><i class="pk"></i>planned cheat day</span>
       <span><i class="td"></i>today</span>
       <span><i></i>open</span>
     </div>
@@ -693,8 +700,6 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
       <li><em>02</em>don&rsquo;t train or chase steps with a fever, chills, or lightheadedness. the deficit can wait.</li>
       <li><em>03</em>if the weekly average stalls 2&ndash;3 weeks, drop calories by 100&ndash;150. not more.</li>
       <li><em>04</em>judge it on weekly weights. daily numbers are water, not fat.</li>
-      <li><em>05</em>planned cheat days: 2 a month max, marked ahead of time, about a week apart (14th, then the 25th). light red on the calendar. still hit your steps and drink lots of water.</li>
-      <li><em>06</em>going over calories unplanned, or cheating two days in a row, is not allowed. that day is red and it counts as missed.</li>
     </ul>
   </section>
 
@@ -1406,20 +1411,35 @@ const CUT={start:'2026-10-05',end:'2026-12-20',backup:'2026-12-31',from:165.7,go
 const CUT_DAILY=[
   {id:'cal', t:'calories',            d:'hit the target for the day'},
   {id:'miss',t:'missed calories',     d:'went over — marks the day red'},
-  {id:'cheat',t:'planned cheat day',   d:'max 2 a month · never back to back · still hit steps + drink lots of water'},
-  {id:'step',t:'steps',               d:'8k on gym days, 10k on rest'},
+  {id:'step',t:'steps',               d:'6k floor when busy · 8k normal · 10k on days you don\u2019t train', tiers:true},
   {id:'gym', t:'went to the gym',     d:'trained today'},
   {id:'sup', t:'supplements',         d:'creatine 5g · vit d + fish oil with food · magnesium 30–60 min before bed'},
   {id:'stud',t:'personal study',      d:'read, learn, work on something that is yours'},
 ];
+/* step tiers — any of them counts as steps met */
+const STEP_TIERS=[
+  {id:'s6', n:'6k',  d:'busy day floor'},
+  {id:'s8', n:'8k',  d:'normal'},
+  {id:'s10',n:'10k', d:'no training'},
+];
+const STEP_IDS=STEP_TIERS.map(t=>t.id);
+function stepsMet(r){
+  if(!r||!r.d)return false;
+  return r.d.indexOf('step')>=0 || STEP_IDS.some(id=>r.d.indexOf(id)>=0);
+}
+function stepTier(r){
+  if(!r||!r.d)return null;
+  const t=STEP_TIERS.find(x=>r.d.indexOf(x.id)>=0);
+  return t?t.n:(r.d.indexOf('step')>=0?'':null);
+}
 /* calories decides the colour before anything else */
-const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps',blue:'calories + steps + gym',red:'missed calories',cheat:'planned cheat day'};
+const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps',blue:'calories + steps + gym',red:'missed calories'};
 const CUT_WEEKLY=[
   {id:'gym', t:'gym sessions',        d:'back · chest · legs · biceps', n:3},
   {id:'rope',t:'jump rope',           d:'two sessions',                 n:2},
   {id:'run', t:'run',                 d:'one',                          n:1},
   {id:'out', t:'surf, hike or mtb',   d:'bonus — not required',         n:1},
-  {id:'meal',t:'flexible meal',       d:'a planned meal, separate from a cheat day',     n:1},
+  {id:'meal',t:'flexible meal',       d:'planned, not a cheat day',     n:1},
   {id:'wgh', t:'monday weigh-in',     d:'after the bathroom, before food or water', n:1},
   {id:'pho', t:'progress photo',      d:'same light, angle, time',      n:1},
   {id:'sets',t:'log top sets',        d:'squat · bench · deadlift',     n:1},
@@ -1446,17 +1466,16 @@ function dayColor(str){
   const r=cutStore().days[str];
   if(!r||!r.d||!r.d.length)return '';
   const has=id=>r.d.indexOf(id)>=0;
-  if(has('cheat'))return 'cheat';              /* planned = light red, not a miss */
   if(has('miss'))return 'red';                 /* calories first, always */
   if(!has('cal'))return 'part';                /* logged, but calories undecided */
-  if(has('step')&&has('gym'))return 'blue';
-  if(has('step'))return 'dgreen';
+  const st=stepsMet(r);
+  if(st&&has('gym'))return 'blue';
+  if(st)return 'dgreen';
   return 'lgreen';
 }
 /* "hit" = calories met. drives the streak and the weekly score. */
 function dayHit(r,str){
   if(!r||!r.d)return false;
-  if(r.d.indexOf('cheat')>=0)return true;      /* planned cheat day keeps the streak */
   return r.d.indexOf('cal')>=0 && r.d.indexOf('miss')<0;
 }
 const dayTouched=r=>!!r&&(r.k!=null||r.s!=null||(r.d&&r.d.length>0));
@@ -1505,30 +1524,42 @@ function renderDayCard(){
   const isToday=str===todayStr();
   const col=dayColor(str);
   $('#dayCardDate').textContent=isToday?'today':dOf(str).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}).toLowerCase();
-  $('#dayCardState').textContent=col?(CUT_COLORS[col]||'in progress'):'not logged';
+  let stateTxt=col?(CUT_COLORS[col]||'in progress'):'not logged';
+  const tier=stepTier(r);
+  if(tier&&(col==='dgreen'||col==='blue'))stateTxt+=' ('+tier+')';
+  $('#dayCardState').textContent=stateTxt;
   const bt=$('#backToday'), card=$('#dayCard');
   if(bt)bt.style.display=isToday?'none':'block';
   if(card)card.classList.toggle('past',!isToday);
-  $('#ckList').innerHTML=CUT_DAILY.map(it=>
-    '<li class="ckitem'+((r.d||[]).includes(it.id)?' on':'')+'" data-ck="'+it.id+'">'+
-    '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span></li>').join('');
+  const on=(r.d||[]);
+  $('#ckList').innerHTML=CUT_DAILY.map(it=>{
+    if(it.tiers){
+      return '<li class="ckitem steprow'+(stepsMet(r)?' on':'')+'">'+
+        '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span>'+
+        '<span class="tiers">'+STEP_TIERS.map(t=>
+          '<button class="tier'+(on.includes(t.id)?' on':'')+'" data-t="'+t.id+'" title="'+t.d+'">'+t.n+'</button>'
+        ).join('')+'</span></li>';
+    }
+    return '<li class="ckitem'+(on.includes(it.id)?' on':'')+'" data-ck="'+it.id+'">'+
+      '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+it.d+'</s></span></li>';
+  }).join('');
+  $$('#ckList .tier').forEach(bt=>bt.onclick=e=>{
+    e.stopPropagation();
+    const id=bt.dataset.t, rec=dayRec(cutDay);
+    rec.d=rec.d||[];
+    const had=rec.d.indexOf(id)>=0;
+    /* one tier at a time, and clear the legacy flag */
+    [...STEP_IDS,'step'].forEach(x=>{const j=rec.d.indexOf(x);if(j>=0)rec.d.splice(j,1);});
+    if(!had)rec.d.push(id);
+    save();renderDayCard();renderCalendar();renderStreak();
+    if(navigator.vibrate)navigator.vibrate(6);
+  });
   $$('#ckList .ckitem').forEach(li=>li.onclick=()=>{
     const id=li.dataset.ck, rec=dayRec(cutDay);
     rec.d=rec.d||[];
     const i=rec.d.indexOf(id);
     if(i<0){
-      if(id==='cheat'){
-        const c=cutStore(), dd=dOf(cutDay), pad=n=>String(n).padStart(2,'0');
-        const fmt=x=>x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());
-        const near=n=>{const x=new Date(dd);x.setDate(x.getDate()+n);const q=c.days[fmt(x)];return !!q&&(q.d||[]).indexOf('cheat')>=0;};
-        if(near(-1)||near(1)){toast('no back-to-back cheat days');return;}
-        const ym=cutDay.slice(0,7);
-        const cnt=Object.keys(c.days).filter(k=>k.slice(0,7)===ym&&k!==cutDay&&(c.days[k].d||[]).indexOf('cheat')>=0).length;
-        if(cnt>=2){toast('2 planned cheat days a month max');return;}
-      }
       rec.d.push(id);
-      if(id==='cheat'){['cal','miss'].forEach(x=>{const j=rec.d.indexOf(x);if(j>=0)rec.d.splice(j,1);});}
-      if((id==='cal'||id==='miss')&&rec.d.indexOf('cheat')>=0)rec.d.splice(rec.d.indexOf('cheat'),1);
       /* hit and missed are opposites — ticking one clears the other */
       if(id==='cal'){const j=rec.d.indexOf('miss');if(j>=0)rec.d.splice(j,1);}
       if(id==='miss'){const j=rec.d.indexOf('cal');if(j>=0)rec.d.splice(j,1);}

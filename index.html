@@ -443,6 +443,8 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .calday.dgreen{background:#2f6b42;border-color:#2f6b42;color:#f2f6f2}
 .calday.blue{background:#8bbbdd;border-color:#6ea4c9;color:#08202e}
 .calday.red{background:#c8102e;border-color:#c8102e;color:#fdf0f2}
+.calday.cheat{background:#f4b6bd;border-color:#e58f9a;color:#3a0a10}
+.calday.under{background:#f1d98a;border-color:#d9bd5f;color:#2e2406}
 .calday.part{box-shadow:inset 0 -5px 0 rgba(8,8,8,.22)}
 .calday.miss{opacity:.62}
 .calday.miss:before{content:'';position:absolute;left:50%;top:50%;width:13px;height:1px;background:currentColor;
@@ -461,6 +463,8 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .callegend i.dg{background:#2f6b42;border-color:#2f6b42}
 .callegend i.bl{background:#8bbbdd;border-color:#6ea4c9}
 .callegend i.rd{background:#c8102e;border-color:#c8102e}
+.callegend i.pk{background:#f4b6bd;border-color:#e58f9a}
+.callegend i.un{background:#f1d98a;border-color:#d9bd5f}
 .callegend i.td{border-color:var(--red);border-width:2px}
 
 /* weight */
@@ -670,10 +674,12 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
     <p class="caltip rv">tap any square to fill that day in &mdash; missed days stay crossed until you do.</p>
     <div class="calwrap rv" id="calWrap"></div>
     <div class="callegend rv">
-      <span><i class="lg"></i>calories</span>
+      <span><i class="lg"></i>calories hit</span>
       <span><i class="dg"></i>calories + steps</span>
       <span><i class="bl"></i>cals + steps + gym</span>
-      <span><i class="rd"></i>missed calories</span>
+      <span><i class="rd"></i>went over</span>
+      <span><i class="un"></i>went under</span>
+      <span><i class="pk"></i>planned cheat day</span>
       <span><i class="td"></i>today</span>
       <span><i></i>open</span>
     </div>
@@ -698,6 +704,9 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
       <li><em>02</em>don&rsquo;t train or chase steps with a fever, chills, or lightheadedness. the deficit can wait.</li>
       <li><em>03</em>if the weekly average stalls 2&ndash;3 weeks, drop calories by 100&ndash;150. not more.</li>
       <li><em>04</em>judge it on weekly weights. daily numbers are water, not fat.</li>
+      <li><em>05</em>planned cheat days: 2 a month max, marked ahead of time, about a week apart. light red on the calendar. still hit your steps and drink lots of water.</li>
+      <li><em>06</em>going over calories unplanned, or cheating two days in a row, is not allowed. that day is red and it counts as missed.</li>
+      <li><em>07</em>undereating is not a win. more than 150 under your target is amber and breaks the streak. keep the muscle, cut the fat.</li>
     </ul>
   </section>
 
@@ -1396,8 +1405,10 @@ function closeSheet(){
    ============================================================ */
 const CUT={start:'2026-10-05',end:'2026-12-20',backup:'2026-12-31',from:165.7,goal:150};
 const CUT_DAILY=[
-  {id:'cal', t:'calories',            d:'hit the target for the day'},
-  {id:'miss',t:'missed calories',     d:'went over — marks the day red'},
+  {id:'cal', t:'calories hit',        d:'within 150 of your target'},
+  {id:'miss',t:'went over',           d:'more than 150 over — marks the day red'},
+  {id:'under',t:'went under',         d:'more than 150 under — not a win, breaks the streak'},
+  {id:'cheat',t:'planned cheat day',  d:'max 2 a month · never back to back · still hit steps + drink lots of water'},
   {id:'step',t:'steps',               d:'6k floor when busy · 8k normal · 10k on days you don\u2019t train', tiers:true},
   {id:'gym', t:'went to the gym',     d:'trained today'},
   {id:'sup', t:'supplements',         d:'creatine 5g · vit d + fish oil with food · magnesium 30–60 min before bed'},
@@ -1420,7 +1431,7 @@ function stepTier(r){
   return t?t.n:(r.d.indexOf('step')>=0?'':null);
 }
 /* calories decides the colour before anything else */
-const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps',blue:'calories + steps + gym',red:'missed calories'};
+const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps',blue:'calories + steps + gym',red:'went over',under:'went under',cheat:'planned cheat day'};
 const CUT_WEEKLY=[
   {id:'gym', t:'gym sessions',        d:'back · chest · legs · biceps', n:3},
   {id:'rope',t:'jump rope',           d:'two sessions',                 n:2},
@@ -1453,7 +1464,9 @@ function dayColor(str){
   const r=cutStore().days[str];
   if(!r||!r.d||!r.d.length)return '';
   const has=id=>r.d.indexOf(id)>=0;
+  if(has('cheat'))return 'cheat';              /* planned = light red, not a miss */
   if(has('miss'))return 'red';                 /* calories first, always */
+  if(has('under'))return 'under';              /* eating too little is not a win */
   if(!has('cal'))return 'part';                /* logged, but calories undecided */
   const st=stepsMet(r);
   if(st&&has('gym'))return 'blue';
@@ -1463,7 +1476,8 @@ function dayColor(str){
 /* "hit" = calories met. drives the streak and the weekly score. */
 function dayHit(r,str){
   if(!r||!r.d)return false;
-  return r.d.indexOf('cal')>=0 && r.d.indexOf('miss')<0;
+  if(r.d.indexOf('cheat')>=0)return true;      /* planned cheat day keeps the streak */
+  return r.d.indexOf('cal')>=0 && r.d.indexOf('miss')<0 && r.d.indexOf('under')<0;
 }
 const dayTouched=r=>!!r&&(r.k!=null||r.s!=null||(r.d&&r.d.length>0));
 
@@ -1546,10 +1560,19 @@ function renderDayCard(){
     rec.d=rec.d||[];
     const i=rec.d.indexOf(id);
     if(i<0){
+      if(id==='cheat'){
+        const c=cutStore(), dd=dOf(cutDay), pad=n=>String(n).padStart(2,'0');
+        const fmt=x=>x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());
+        const near=n=>{const x=new Date(dd);x.setDate(x.getDate()+n);const q=c.days[fmt(x)];return !!q&&(q.d||[]).indexOf('cheat')>=0;};
+        if(near(-1)||near(1)){toast('no back-to-back cheat days');return;}
+        const ym=cutDay.slice(0,7);
+        const cnt=Object.keys(c.days).filter(k=>k.slice(0,7)===ym&&k!==cutDay&&(c.days[k].d||[]).indexOf('cheat')>=0).length;
+        if(cnt>=2){toast('2 planned cheat days a month max');return;}
+      }
       rec.d.push(id);
-      /* hit and missed are opposites — ticking one clears the other */
-      if(id==='cal'){const j=rec.d.indexOf('miss');if(j>=0)rec.d.splice(j,1);}
-      if(id==='miss'){const j=rec.d.indexOf('cal');if(j>=0)rec.d.splice(j,1);}
+      /* hit / over / under / planned cheat are one choice — ticking one clears the others */
+      const CAL_SET=['cal','miss','under','cheat'];
+      if(CAL_SET.indexOf(id)>=0)CAL_SET.forEach(x=>{if(x!==id){const j=rec.d.indexOf(x);if(j>=0)rec.d.splice(j,1);}});
     } else rec.d.splice(i,1);
     save();renderDayCard();renderCalendar();renderStreak();
     if(navigator.vibrate)navigator.vibrate(6);

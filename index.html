@@ -652,14 +652,14 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
   <!-- 01 CUT -->
   <section class="scene" id="s-cut">
-    <div class="smark"><span>01 / the cut</span><span id="cutMark">to dec 20</span></div>
-    <p class="eyebrow rv">165.7 &rarr; 150</p>
+    <div class="smark"><span>01 / the cut</span><span id="cutMark">to jan 15</span></div>
+    <p class="eyebrow rv">165.7 &rarr; 145</p>
     <h2 class="smear rv" id="hCut"><span class="t">the cut</span></h2>
 
     <div class="cuthead rv" id="cutHead"></div>
     <div class="rv">
       <div class="cutbar" id="cutBar"><i></i><u></u></div>
-      <div class="cutbarlbl"><span id="cutFrom">165.7</span><span id="cutGoal">150.0</span></div>
+      <div class="cutbarlbl"><span id="cutFrom">165.7</span><span id="cutGoal">145.0</span></div>
     </div>
 
     <div class="daycard rv" id="dayCard">
@@ -1401,9 +1401,11 @@ function closeSheet(){
 
 
 /* ============================================================
-   THE CUT — oct 5 to dec 20, 2026
+   THE CUT — oct 5, 2026 to jan 15, 2027
    ============================================================ */
-const CUT={start:'2026-10-05',end:'2026-12-20',backup:'2026-12-31',from:165.7,goal:150};
+const CUT={start:'2026-10-05',end:'2027-01-15',backup:'2027-01-15',from:165.7,goal:145};
+/* plan lines are anchored to where he actually was on oct 26, not the day-one weight */
+const PLAN_FROM=['2026-10-26',153.9];
 const CUT_DAILY=[
   {id:'cal', t:'calories hit',        d:'within 150 of your target'},
   {id:'miss',t:'went over',           d:'more than 150 over — marks the day red'},
@@ -1444,10 +1446,10 @@ const CUT_WEEKLY=[
 ];
 /* monday checkpoints — [date, fast, safe] */
 const CUT_MARKS=[
-  ['2026-10-12',164.3,164.4],['2026-10-19',162.8,163.2],['2026-10-26',161.4,161.9],
-  ['2026-11-02',159.9,160.7],['2026-11-09',158.5,159.4],['2026-11-16',157.0,158.1],
-  ['2026-11-23',155.6,156.9],['2026-11-30',154.1,155.6],['2026-12-07',152.7,154.4],
-  ['2026-12-14',151.2,153.1],['2026-12-21',150.0,151.8],
+  ['2026-11-02',152.7,153.1],['2026-11-09',151.5,152.3],['2026-11-16',150.3,151.5],
+  ['2026-11-23',149.1,150.7],['2026-11-30',147.9,149.9],['2026-12-07',146.7,149.1],
+  ['2026-12-14',145.5,148.3],['2026-12-21',145.0,147.5],['2026-12-28',145.0,146.7],
+  ['2027-01-04',145.0,145.9],['2027-01-11',145.0,145.1],
 ];
 
 const dOf=s=>new Date(s+'T12:00:00');
@@ -1488,7 +1490,7 @@ function renderCutHead(){
   const w=latestWeight();
   const togo=Math.max(0,+(w-CUT.goal).toFixed(1));
   const h=$('#cutHead');if(!h)return;
-  h.innerHTML='<div><b>'+left+'</b><span>days to dec 20</span></div>'+
+  h.innerHTML='<div><b>'+left+'</b><span>days to jan 15</span></div>'+
     '<div><b>'+w.toFixed(1)+'</b><span>current lb</span></div>'+
     '<div><b>'+togo.toFixed(1)+'</b><span>lb to go</span></div>';
   const span=CUT.from-CUT.goal;
@@ -1505,7 +1507,8 @@ function latestWeight(){
 }
 /* where the safe line says he should be today */
 function paceTarget(str){
-  let prev=[CUT.start,CUT.from,CUT.from];
+  if(str<=PLAN_FROM[0])return PLAN_FROM[1];
+  let prev=[PLAN_FROM[0],PLAN_FROM[1],PLAN_FROM[1]];
   for(const m of CUT_MARKS){
     if(str<=m[0]){
       const span=daysBetween(prev[0],m[0])||1, got=daysBetween(prev[0],str);
@@ -1612,7 +1615,7 @@ function renderStreak(){
 }
 
 /* ---- calendar ---- */
-const MONTHS=[[2026,9],[2026,10],[2026,11]];
+const MONTHS=[[2026,9],[2026,10],[2026,11],[2027,0]];
 function renderCalendar(){
   const wrap=$('#calWrap');if(!wrap)return;
   const c=cutStore(), today=todayStr();
@@ -1655,13 +1658,13 @@ function drawWeight(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
   const padL=30,padR=8,padT=12,padB=20;
-  const x0=dOf(CUT.start).getTime(), x1=dOf('2026-12-21').getTime();
-  const yMin=148,yMax=167;
+  const x0=dOf(CUT.start).getTime(), x1=dOf('2027-01-16').getTime();
+  const yMin=143,yMax=167;
   const X=t=>padL+((t-x0)/(x1-x0))*(W-padL-padR);
   const Y=v=>padT+((yMax-v)/(yMax-yMin))*(H-padT-padB);
   const ink=getComputedStyle(document.body).getPropertyValue('--ink').trim()||'#080808';
   ctx.font='8px ui-monospace,monospace';ctx.fillStyle=ink;ctx.globalAlpha=.45;
-  [150,155,160,165].forEach(v=>{
+  [145,150,155,160,165].forEach(v=>{
     ctx.globalAlpha=.13;ctx.beginPath();ctx.moveTo(padL,Y(v));ctx.lineTo(W-padR,Y(v));ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
     ctx.globalAlpha=.45;ctx.fillText(String(v),2,Y(v)+3);
   });
@@ -1672,8 +1675,8 @@ function drawWeight(){
     ctx.beginPath();pts.forEach((p,i)=>{const fx=X(dOf(p[0]).getTime()),fy=Y(p[1]);i?ctx.lineTo(fx,fy):ctx.moveTo(fx,fy);});
     ctx.stroke();ctx.restore();
   };
-  line([[CUT.start,CUT.from]].concat(CUT_MARKS.map(m=>[m[0],m[1]])),[4,3],.42);
-  line([[CUT.start,CUT.from]].concat(CUT_MARKS.map(m=>[m[0],m[2]])),[],.60);
+  line([PLAN_FROM.slice(0,2)].concat(CUT_MARKS.map(m=>[m[0],m[1]])),[4,3],.42);
+  line([PLAN_FROM.slice(0,2)].concat(CUT_MARKS.map(m=>[m[0],m[2]])),[],.60);
   const c=cutStore();
   const act=Object.keys(c.weigh).sort().map(k=>[k,c.weigh[k]]);
   const all=[[CUT.start,CUT.from]].concat(act.filter(p=>p[0]>CUT.start));
@@ -1683,7 +1686,8 @@ function drawWeight(){
   ctx.globalAlpha=.45;ctx.fillStyle=ink;
   ctx.fillText('oct',X(dOf('2026-10-05').getTime()),H-6);
   ctx.fillText('nov',X(dOf('2026-11-02').getTime()),H-6);
-  ctx.fillText('dec 20',X(dOf('2026-12-14').getTime()),H-6);
+  ctx.fillText('dec',X(dOf('2026-12-01').getTime()),H-6);
+  ctx.fillText('jan 15',X(dOf('2027-01-05').getTime()),H-6);
   ctx.globalAlpha=1;
   /* two weeks above the safe line -> flag */
   const f=$('#wFlag');if(!f)return;

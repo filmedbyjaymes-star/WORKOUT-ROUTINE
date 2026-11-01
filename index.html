@@ -33,6 +33,7 @@
   --red:#c8102e;
   --g1:#5f8f4e;
   --g2:#2f5f2a;
+  --am:#9a6b16;
   --hair:rgba(8,8,8,.20);
   --hair2:rgba(8,8,8,.10);
   --mono:'Courier Prime',ui-monospace,'SF Mono',Menlo,monospace;
@@ -461,14 +462,17 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 /* cut: colour-coded boxes */
 .ckitem[data-ck="cal"].on .ckbox{background:var(--g1);border-color:var(--g1)}
 .ckitem[data-ck="step"].on .ckbox{background:var(--g2);border-color:var(--g2)}
-.ckitem[data-ck="over"].on .ckbox{background:var(--red);border-color:var(--red)}
+.ckitem[data-ck="miss"].on .ckbox{background:var(--red);border-color:var(--red)}
+.ckitem[data-ck="under"].on .ckbox{background:var(--am);border-color:var(--am)}
 .calday.g1{background:var(--g1);border-color:var(--g1);color:#fff}
 .calday.g2{background:var(--g2);border-color:var(--g2);color:#fff}
 .calday.over{background:var(--red);border-color:var(--red);color:#fff}
-.calday.g1 span,.calday.g2 span,.calday.over span{opacity:.92}
+.calday.under{background:var(--am);border-color:var(--am);color:#fff}
+.calday.g1 span,.calday.g2 span,.calday.over span,.calday.under span{opacity:.92}
 .callegend i.g1{background:var(--g1);border-color:var(--g1)}
 .callegend i.g2{background:var(--g2);border-color:var(--g2)}
 .callegend i.ov{background:var(--red);border-color:var(--red)}
+.callegend i.un{background:var(--am);border-color:var(--am)}
 
 /* ---------- SKIN ---------- */
 #s-skin{justify-content:flex-start}
@@ -667,14 +671,14 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 
   <!-- 01 CUT -->
   <section class="scene" id="s-cut">
-    <div class="smark"><span>01 / the cut</span><span id="cutMark">to dec 20</span></div>
-    <p class="eyebrow rv">165.7 &rarr; 150</p>
+    <div class="smark"><span>01 / the cut</span><span id="cutMark">to jan 15</span></div>
+    <p class="eyebrow rv">165.7 &rarr; 145</p>
     <h2 class="smear rv" id="hCut"><span class="t">the cut</span></h2>
 
     <div class="cuthead rv" id="cutHead"></div>
     <div class="rv">
       <div class="cutbar" id="cutBar"><i></i><u></u></div>
-      <div class="cutbarlbl"><span id="cutFrom">165.7</span><span id="cutGoal">150.0</span></div>
+      <div class="cutbarlbl"><span id="cutFrom">165.7</span><span id="cutGoal">145.0</span></div>
     </div>
 
     <div class="daycard rv" id="dayCard">
@@ -688,7 +692,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
     <div class="calwrap rv" id="calWrap"></div>
     <div class="callegend rv">
       <span><i class="g1"></i>calories</span><span><i class="g2"></i>+ steps</span>
-      <span><i class="ov"></i>over</span><span><i></i>open</span>
+      <span><i class="ov"></i>over</span><span><i class="un"></i>under</span><span><i></i>open</span>
     </div>
 
     <p class="eyebrow rv" style="margin-top:28px">the scale &mdash; mondays only</p>
@@ -1472,18 +1476,21 @@ function closeSheet(){
 
 
 /* ============================================================
-   THE CUT — oct 5 to dec 20, 2026
+   THE CUT — oct 5 2026 to jan 15 2027
    ============================================================ */
-const CUT={start:'2026-10-05',end:'2026-12-20',backup:'2026-12-31',from:165.7,goal:150};
+const CUT={start:'2026-10-05',end:'2027-01-15',backup:'2027-01-15',from:165.7,goal:145};
 const KCAL=1800, KCAL_SLOP=100;
 /* 8k on gym days (mon/wed/thu), 10k otherwise */
 const CUT_STEP=[10000,8000,10000,8000,8000,10000,10000];
 const CUT_DAILY=[
-  {id:'cal', t:'calories',       d:'landed on target today'},
-  {id:'step',t:'steps',          d:'8k on gym days, 10k on rest'},
-  {id:'over',t:'over target',    d:'went past it — log it and move on'},
-  {id:'sup', t:'supplements',    d:'creatine 5g · vit d + fish oil with food · magnesium before bed'},
-  {id:'stud',t:'personal study', d:'read, learn, work on something that is yours'},
+  {id:'cal',  t:'calories hit',      d:'within 150 of your target'},
+  {id:'miss', t:'went over',         d:'more than 150 over — marks the day red'},
+  {id:'under',t:'went under',        d:'more than 150 under — not a win, breaks the streak'},
+  {id:'cheat',t:'planned cheat day', d:'max 2 a month · never back to back · still hit steps + drink lots of water'},
+  {id:'step', t:'steps',             d:'6k floor when busy · 8k normal · 10k on days you don’t train'},
+  {id:'gym',  t:'went to the gym',   d:'trained today'},
+  {id:'sup',  t:'supplements',       d:'creatine 5g · vit d + fish oil with food · magnesium 30–60 min before bed'},
+  {id:'stud', t:'personal study',    d:'read, learn, work on something that is yours'},
 ];
 const CUT_WEEKLY=[
   {id:'gym', t:'gym sessions',        d:'back · chest · legs · biceps', n:3},
@@ -1497,10 +1504,10 @@ const CUT_WEEKLY=[
 ];
 /* monday checkpoints — [date, fast, safe] */
 const CUT_MARKS=[
-  ['2026-10-12',164.3,164.4],['2026-10-19',162.8,163.2],['2026-10-26',161.4,161.9],
-  ['2026-11-02',159.9,160.7],['2026-11-09',158.5,159.4],['2026-11-16',157.0,158.1],
-  ['2026-11-23',155.6,156.9],['2026-11-30',154.1,155.6],['2026-12-07',152.7,154.4],
-  ['2026-12-14',151.2,153.1],['2026-12-21',150.0,151.8],
+  ['2026-11-02',152.7,153.1],['2026-11-09',151.5,152.3],['2026-11-16',150.3,151.5],
+  ['2026-11-23',149.1,150.7],['2026-11-30',147.9,149.9],['2026-12-07',146.7,149.1],
+  ['2026-12-14',145.5,148.3],['2026-12-21',145.0,147.5],['2026-12-28',145.0,146.7],
+  ['2027-01-04',145.0,145.9],['2027-01-11',145.0,145.1],
 ];
 
 const dOf=s=>new Date(s+'T12:00:00');
@@ -1516,7 +1523,8 @@ const stepTargetFor=str=>CUT_STEP[dOf(str).getDay()];
 function dayRec(str){const c=cutStore();return c.days[str]||(c.days[str]={k:null,s:null,d:[]});}
 function dayState(r){
   const d=(r&&r.d)||[];
-  if(d.includes('over'))return 'over';
+  if(d.includes('miss'))return 'over';
+  if(d.includes('under'))return 'under';
   if(d.includes('cal')&&d.includes('step'))return 'g2';
   if(d.includes('cal'))return 'g1';
   if(d.length)return 'part';
@@ -1532,7 +1540,7 @@ function renderCutHead(){
   const w=latestWeight();
   const togo=Math.max(0,+(w-CUT.goal).toFixed(1));
   const h=$('#cutHead');if(!h)return;
-  h.innerHTML='<div><b>'+left+'</b><span>days to dec 20</span></div>'+
+  h.innerHTML='<div><b>'+left+'</b><span>days to jan 15</span></div>'+
     '<div><b>'+w.toFixed(1)+'</b><span>current lb</span></div>'+
     '<div><b>'+togo.toFixed(1)+'</b><span>lb to go</span></div>';
   const span=CUT.from-CUT.goal;
@@ -1568,10 +1576,10 @@ function renderDayCard(){
   const r=dayRec(str), st=stepTargetFor(str), isToday=str===todayStr();
   const state=dayState(r);
   $('#dayCardDate').textContent=isToday?'today':dOf(str).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}).toLowerCase();
-  $('#dayCardState').textContent={over:'over target',g2:'calories + steps',g1:'calories hit',part:'in progress',none:'nothing ticked'}[state];
+  $('#dayCardState').textContent={over:'went over',under:'went under',g2:'calories + steps',g1:'calories hit',part:'in progress',none:'nothing ticked'}[state];
   $('#ckList').innerHTML=CUT_DAILY.map(it=>{
     const on=(r.d||[]).includes(it.id);
-    const d=it.id==='step'?('8k on gym days, 10k on rest — today '+st.toLocaleString()):it.d;
+    const d=it.d;
     return '<li class="ckitem'+(on?' on':'')+'" data-ck="'+it.id+'">'+
       '<span class="ckbox"></span><span class="ct"><b>'+it.t+'</b><s>'+d+'</s></span></li>';
   }).join('');
@@ -1582,8 +1590,8 @@ function renderDayCard(){
     if(i<0){
       rec.d.push(id);
       // you either hit the target or you went past it, never both
-      if(id==='over')rec.d=rec.d.filter(x=>x!=='cal');
-      if(id==='cal') rec.d=rec.d.filter(x=>x!=='over');
+      const EXCL=['cal','miss','under'];
+      if(EXCL.includes(id))rec.d=rec.d.filter(x=>x===id||!EXCL.includes(x));
     } else rec.d.splice(i,1);
     save();renderDayCard();renderCalendar();renderStreak();
     if(navigator.vibrate)navigator.vibrate(6);
@@ -1620,7 +1628,7 @@ function renderStreak(){
 }
 
 /* ---- calendar ---- */
-const MONTHS=[[2026,9],[2026,10],[2026,11]];
+const MONTHS=[[2026,9],[2026,10],[2026,11],[2027,0]];
 function renderCalendar(){
   const wrap=$('#calWrap');if(!wrap)return;
   const c=cutStore(), today=todayStr();
@@ -1662,13 +1670,13 @@ function drawWeight(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
   const padL=30,padR=8,padT=12,padB=20;
-  const x0=dOf(CUT.start).getTime(), x1=dOf('2026-12-21').getTime();
-  const yMin=148,yMax=167;
+  const x0=dOf(CUT.start).getTime(), x1=dOf('2027-01-15').getTime();
+  const yMin=143,yMax=167;
   const X=t=>padL+((t-x0)/(x1-x0))*(W-padL-padR);
   const Y=v=>padT+((yMax-v)/(yMax-yMin))*(H-padT-padB);
   const ink=getComputedStyle(document.body).getPropertyValue('--ink').trim()||'#080808';
   ctx.font='8px ui-monospace,monospace';ctx.fillStyle=ink;ctx.globalAlpha=.45;
-  [150,155,160,165].forEach(v=>{
+  [145,150,155,160,165].forEach(v=>{
     ctx.globalAlpha=.13;ctx.beginPath();ctx.moveTo(padL,Y(v));ctx.lineTo(W-padR,Y(v));ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
     ctx.globalAlpha=.45;ctx.fillText(String(v),2,Y(v)+3);
   });
@@ -1690,7 +1698,8 @@ function drawWeight(){
   ctx.globalAlpha=.45;ctx.fillStyle=ink;
   ctx.fillText('oct',X(dOf('2026-10-05').getTime()),H-6);
   ctx.fillText('nov',X(dOf('2026-11-02').getTime()),H-6);
-  ctx.fillText('dec 20',X(dOf('2026-12-14').getTime()),H-6);
+  ctx.fillText('dec',X(dOf('2026-12-07').getTime()),H-6);
+  ctx.fillText('jan 15',X(dOf('2027-01-05').getTime()),H-6);
   ctx.globalAlpha=1;
   /* two weeks above the safe line -> flag */
   const f=$('#wFlag');if(!f)return;

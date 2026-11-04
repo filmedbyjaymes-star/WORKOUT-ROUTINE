@@ -1784,32 +1784,12 @@ function drawWeight(){
   else f.style.display='none';
 }
 
-/* ---- skin: the clipboard breathes ---- */
+/* ---- skin: one still clipboard ---- */
 const CLIP_IDS=['clipA','clipB','clipC','clipD','clipE'];
-let clipTimer=null, clipAt=0;
 function bindClips(){
-  CLIP_IDS.forEach((id,i)=>{
-    const el=document.getElementById(id);
-    if(el&&IMG['clip'+i])el.src=IMG['clip'+i];
-  });
-  const first=document.getElementById(CLIP_IDS[0]);
-  if(first)first.classList.add('on');
+  const el=document.getElementById(CLIP_IDS[0]);
+  if(el&&IMG.clip0){el.src=IMG.clip0;el.classList.add('on');}
 }
-function startClips(){
-  stopClips();
-  if(REDUCED)return;
-  const els=CLIP_IDS.map(id=>document.getElementById(id)).filter(Boolean);
-  if(els.length<2)return;
-  els.forEach((e,i)=>gsap.set(e,{opacity:i===clipAt?1:0}));
-  clipTimer=setInterval(()=>{
-    const from=els[clipAt];
-    clipAt=(clipAt+1)%els.length;
-    const to=els[clipAt];
-    gsap.to(from,{opacity:0,duration:1.6,ease:'power1.inOut'});
-    gsap.to(to,{opacity:1,duration:1.6,ease:'power1.inOut'});
-  },3200);
-}
-function stopClips(){if(clipTimer){clearInterval(clipTimer);clipTimer=null;}}
 
 /* ---- weekly checklist ---- */
 function renderWeekly(){
@@ -1917,9 +1897,7 @@ function enterPage(i){
   if(id==='s-intro')playSelTitle();
   if(id==='s-prs')playBand();
   if(id==='s-bio')playTraits();
-  if(id!=='s-skin')stopClips();
   if(id==='s-cut'){cutDay=todayStr();renderCut();drawWeight();}
-  if(id==='s-skin')startClips();
   if(id==='s-prs')setTimeout(()=>{$$('#prBoard canvas').forEach((c,k)=>
     sparkline(c,['squat','bench press (barbell)','deadlift'][k]));},260);
 }

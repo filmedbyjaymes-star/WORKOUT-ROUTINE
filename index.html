@@ -422,6 +422,10 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
 .ckcount{flex:0 0 auto;font-family:var(--disp);font-size:15px;letter-spacing:-.02em;opacity:.45;padding-top:1px}
 /* step tiers — 6k floor, 8k normal, 10k off-days */
 .steprow{cursor:default}
+.altpick{display:flex;gap:6px;margin:0 0 14px}
+.altbtn{flex:1;background:none;border:1px solid var(--hair);padding:9px 0;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink);opacity:.5;cursor:pointer;filter:url(#rough2)}
+.altbtn.on{background:var(--ink);color:var(--paper);border-color:var(--ink);opacity:1}
 .tiers{display:flex;gap:4px;flex:0 0 auto;padding-top:1px}
 .tier{background:none;border:1px solid var(--hair);padding:6px 7px;font-family:var(--mono);font-size:9px;
   letter-spacing:.04em;color:var(--ink);opacity:.45;cursor:pointer;filter:url(#rough2);transition:.15s}
@@ -995,7 +999,7 @@ const SPLIT=[
    ex:[{n:'surfing',s:'dawn patrol · 1-2 hrs · optional',tag:'drill'},
        {n:'walk',s:'6k steps minimum · 10 min after each meal',tag:'time'}]},
   {key:'mon',day:'monday',focus:'chest / press',mins:70,steps:6000,gym:true,
-   ex:[{n:'incline bench press',s:'3 sets · 6-10 reps'},
+   ex:[{n:'incline bench press',s:'3 sets · 6-10 reps',alts:['barbell','dumbbell']},
        {n:'shoulder press (dumbbell)',s:'3 sets · 10-12 reps'},
        {n:'low cable fly crossovers',s:'3 sets · 12-15 reps'},
        {n:'triceps rope pushdown',s:'3 sets · 12-15 reps'},
@@ -1100,6 +1104,12 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){toast
 const uid=()=>Math.random().toString(36).slice(2,9);
 const e1rm=(w,r)=>r<=1?w:Math.round(w*(1+r/30));
 const norm=s=>String(s||'').trim().toLowerCase();
+/* a lift with alts (barbell / dumbbell) logs under whichever one you picked, so each tracks on its own */
+function exName(x){
+  if(!x.alts)return x.n;
+  const p=(DB.pick&&DB.pick[x.n]);
+  return x.n+' ('+(x.alts.indexOf(p)>=0?p:x.alts[0])+')';
+}
 const fmtDate=d=>{const x=new Date(d+'T12:00:00');return isNaN(x)?d:x.toLocaleDateString('en-US',{month:'short',day:'numeric'}).toLowerCase();};
 const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 function entriesFor(n){const k=norm(n);return DB.logs.filter(l=>norm(l.exercise)===k).sort((a,b)=>a.date<b.date?-1:1);}
@@ -1305,9 +1315,10 @@ function renderDay(){
   const ul=$('#exList');ul.innerHTML='';
   d.ex.forEach((x,i)=>{
     const li=document.createElement('li');li.className='exrow';
-    const last=x.tag?null:lastFor(x.n);
+    const nm=exName(x);
+    const last=x.tag?null:lastFor(nm);
     li.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span>'+
-      '<span class="nm"><b>'+x.n+'</b><s>'+x.s+(x.hist?' · prev '+x.hist:'')+'</s></span>'+
+      '<span class="nm"><b>'+nm+'</b><s>'+x.s+(x.hist?' · prev '+x.hist:'')+'</s></span>'+
       (last?'<span class="last"><b>'+last.weight+' × '+last.reps+'</b>'+fmtDate(last.date)+'</span>':'<span class="arw">+</span>');
     li.onclick=()=>openSheet(x);
     ul.appendChild(li);
@@ -1445,11 +1456,18 @@ function prBurst(){
   if(navigator.vibrate)navigator.vibrate([12,40,18]);}
 let sheetOpen=false;
 function openSheet(x){
-  const isLift=!x.tag;
-  $('#sheetTitle').textContent=x.n;
+  fillSheet(x);
+  const sh=$('#sheet');sh.classList.add('on');sheetOpen=true;
+  gsap.fromTo(sh.querySelector('.scrim'),{opacity:0},{opacity:1,duration:.3});
+  gsap.fromTo(sh.querySelector('.card2'),{y:'100%'},{y:'0%',duration:.5,ease:'power3.out'});
+}
+function fillSheet(x){
+  const isLift=!x.tag, nm=exName(x);
+  $('#sheetTitle').textContent=nm;
   $('#sheetSub').textContent=x.s+(x.hist?'  ·  prev: '+x.hist:'');
-  const last=isLift?lastFor(x.n):null,best=isLift?bestFor(x.n):null,nt=isLift?nextTarget(x.n):null;
+  const last=isLift?lastFor(nm):null,best=isLift?bestFor(nm):null,nt=isLift?nextTarget(nm):null;
   let html='';
+  if(x.alts)html+='<div class="altpick">'+x.alts.map(a=>'<button class="altbtn'+(nm===x.n+' ('+a+')'?' on':'')+'" data-a="'+a+'">'+a+'</button>').join('')+'</div>';
   if(isLift){
     html+='<div class="bestgrid" style="margin-bottom:14px">'+
       '<div><span>last</span><b>'+(last?last.weight+' × '+last.reps:'—')+'</b><i>'+(last?fmtDate(last.date):'not logged')+'</i></div>'+
@@ -1460,18 +1478,19 @@ function openSheet(x){
       '<div class="row2"><div class="field"><label>sets</label><input id="sSt" type="number" inputmode="numeric" value="'+(last&&last.sets?last.sets:3)+'"></div>'+
       '<div class="field"><label>date</label><input id="sDt" type="date" value="'+todayStr()+'"></div></div>'+
       '<button class="btn" id="sSave">log set</button>';
-    const hist=entriesFor(x.n).slice(-5).reverse();
+    const hist=entriesFor(nm).slice(-5).reverse();
     if(hist.length)html+='<ul class="hist">'+hist.map(l=>'<li><span class="h1"><b>'+fmtDate(l.date)+'</b><s>e1rm '+e1rm(l.weight,l.reps)+'</s></span><span class="h2">'+l.weight+' × '+l.reps+'</span></li>').join('')+'</ul>';
   } else {
     html+='<p class="hand" style="opacity:.75">conditioning — no load to track. show up, do the rounds, keep the hands honest.</p><button class="btn ghost" id="sSave" style="margin-top:14px">mark done</button>';
   }
   $('#sheetBody').innerHTML=html;
   $('#sSave').onclick=isLift
-    ?(()=>{if(addEntry(x.n,$('#sWt').value,$('#sRp').value,$('#sSt').value,$('#sDt').value))closeSheet();})
+    ?(()=>{if(addEntry(nm,$('#sWt').value,$('#sRp').value,$('#sSt').value,$('#sDt').value))closeSheet();})
     :(()=>{toast('nice work');closeSheet();});
-  const sh=$('#sheet');sh.classList.add('on');sheetOpen=true;
-  gsap.fromTo(sh.querySelector('.scrim'),{opacity:0},{opacity:1,duration:.3});
-  gsap.fromTo(sh.querySelector('.card2'),{y:'100%'},{y:'0%',duration:.5,ease:'power3.out'});
+  $$('#sheetBody .altbtn').forEach(bt=>bt.onclick=()=>{
+    DB.pick=DB.pick||{};DB.pick[x.n]=bt.dataset.a;save();
+    fillSheet(x);renderDay();
+  });
 }
 function closeSheet(){
   if(!sheetOpen)return;

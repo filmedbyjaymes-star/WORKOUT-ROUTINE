@@ -725,8 +725,10 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
     </div>
     <div class="weighrow rv">
       <div class="numcell"><label>monday weigh-in (lb)</label><input id="wIn" type="number" inputmode="decimal" step="0.1" placeholder="165.7"></div>
+      <div class="numcell"><label>for the week of</label><input id="wDt" type="date"></div>
       <button class="btn sm" id="wSave" style="width:auto;padding:12px 18px">log</button>
     </div>
+    <p class="tiny rv" style="opacity:.5;margin:6px 0 0">pick any day to fix or add a past week &mdash; it files under that week&rsquo;s monday.</p>
     <p class="flagline rv" id="wFlag" style="display:none"></p>
 
 
@@ -1559,6 +1561,12 @@ function mondayOf(str){const d=dOf(str);const w=(d.getDay()+6)%7;d.setDate(d.get
 function cutStore(){
   if(!DB.cut)DB.cut={days:{},weeks:{},weigh:{}};
   DB.cut.days=DB.cut.days||{};DB.cut.weeks=DB.cut.weeks||{};DB.cut.weigh=DB.cut.weigh||{};
+  /* one-time fix: nov 2 was 155.9; the 152.5 there was really sunday nov 8 filed under that week */
+  if(!DB.cut.fixNov2){
+    DB.cut.fixNov2=1;
+    if(DB.cut.weigh['2026-11-02']===152.5)DB.cut.weigh['2026-11-02']=155.9;
+    save();
+  }
   return DB.cut;
 }
 function dayRec(str){const c=cutStore();return c.days[str]||(c.days[str]={d:[]});}
@@ -1684,13 +1692,15 @@ function renderDayCard(){
 function bindCutInputs(){
   const bt=$('#backToday');
   if(bt)bt.onclick=()=>{cutDay=todayStr();renderDayCard();renderCalendar();};
+  const wd=$('#wDt');if(wd)wd.value=todayStr();
   const ws=$('#wSave');
   if(ws)ws.onclick=()=>{
     const v=parseFloat($('#wIn').value);
     if(isNaN(v)){toast('enter a weight');return;}
     const c=cutStore();
-    c.weigh[mondayOf(todayStr())]=v;
-    save();$('#wIn').value='';
+    const dt=($('#wDt')&&$('#wDt').value)||todayStr();
+    c.weigh[mondayOf(dt)]=v;
+    save();$('#wIn').value='';if($('#wDt'))$('#wDt').value=todayStr();
     renderCutHead();drawWeight();renderWeekly();
     toast('logged '+v.toFixed(1)+' lb');
   };

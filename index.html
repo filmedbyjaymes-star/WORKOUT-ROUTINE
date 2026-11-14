@@ -707,7 +707,7 @@ input[type=date]{background:none;border:1px solid var(--hair);color:inherit;padd
     <div class="calwrap rv" id="calWrap"></div>
     <div class="callegend rv">
       <span><i class="lg"></i>calories hit</span>
-      <span><i class="dg"></i>calories + steps</span>
+      <span><i class="dg"></i>calories + steps or gym</span>
       <span><i class="bl"></i>cals + steps + gym</span>
       <span><i class="rd"></i>went over</span>
       <span><i class="un"></i>went under</span>
@@ -1535,7 +1535,7 @@ function stepTier(r){
   return t?t.n:(r.d.indexOf('step')>=0?'':null);
 }
 /* calories decides the colour before anything else */
-const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps',blue:'calories + steps + gym',red:'went over',under:'went under',cheat:'planned cheat day'};
+const CUT_COLORS={lgreen:'calories',dgreen:'calories + steps or gym',blue:'calories + steps + gym',red:'went over',under:'went under',cheat:'planned cheat day'};
 const CUT_WEEKLY=[
   {id:'gym', t:'gym sessions',        d:'back · chest · legs · biceps', n:3},
   {id:'rope',t:'jump rope',           d:'two sessions',                 n:2},
@@ -1580,7 +1580,7 @@ function dayColor(str){
   if(!has('cal'))return 'part';                /* logged, but calories undecided */
   const st=stepsMet(r);
   if(st&&has('gym'))return 'blue';
-  if(st)return 'dgreen';
+  if(st||has('gym'))return 'dgreen';      /* gym day with calories hit counts, steps optional */
   return 'lgreen';
 }
 /* "hit" = calories met. drives the streak and the weekly score. */
